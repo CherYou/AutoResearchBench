@@ -1,4 +1,4 @@
-<h1 align="center">SciBench</h1>
+<h1 align="center">Academic DeepWide Search</h1>
 
 <p align="center">English · <a href="README_zh.md">简体中文</a></p>
 
@@ -33,7 +33,7 @@
 
 </div>
 
-## Academic DeepWide Search (brief)
+## Abstract
 
 The Academic DeepWide Search benchmark is designed for **scientific literature search** under conditions where credible answers typically require **full-text reading**, **fine-grained evidence**, and **multi-hop reasoning along citation relations**, rather than shallow keyword or abstract-level matching.
 

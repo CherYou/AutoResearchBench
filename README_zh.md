@@ -1,4 +1,4 @@
-<h1 align="center">SciBench</h1>
+<h1 align="center">Academic DeepWide Search</h1>
 
 <p align="center"><a href="README.md">English</a> · 简体中文</p>
 
@@ -33,7 +33,7 @@
 
 </div>
 
-## Academic DeepWide Search 概要
+## 概要
 
 Academic DeepWide Search 面向**科学文献检索**场景：可信答案往往依赖**全文层面的证据**、**细粒度对齐**以及沿**引用关系的多跳推理**，而非仅依赖标题、摘要或浅层关键词匹配。
 
