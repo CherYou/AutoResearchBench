@@ -17,10 +17,6 @@
 </a>
 <a href="#benchmark-data">
   <img src="https://img.shields.io/badge/Benchmark_Data-Download_%26_Decrypt-0F766E?style=for-the-badge&logo=databricks&logoColor=white" alt="Benchmark Data" />
-</a>
-<a href="#repository-map">
-  <img src="https://img.shields.io/badge/Repository_Map-Code_Guide-2563EB?style=for-the-badge&logo=github&logoColor=white" alt="Repository Map" />
-</a>
 
 <br />
 <br />
@@ -39,10 +35,10 @@ The Academic DeepWide Search benchmark is designed for **scientific literature s
 
 Two complementary tracks are evaluated:
 
-- **Deep Search** (*precision-oriented retrieval*): locate the unique paper that satisfies a set of deliberately obfuscated, detail-heavy constraints (including evidence that may appear deep in the main text, appendix, or figures).
+- **Deep Search** (*precision-oriented retrieval*): locate the unique paper that satisfies a set of obfuscated, detail-heavy constraints (including evidence that may appear deep in the main text, appendix, or tables).
 - **Wide Search** (*recall-oriented set construction*): given a topic and constraints, collect **all** papers that meet the specification—analogous to exhaustive coverage in a structured literature survey.
 
-Empirical reports in the accompanying materials indicate that contemporary frontier models remain **far below saturation** on these tracks (e.g., on the order of **single-digit accuracy** for Deep Search and **single-digit IoU** for Wide Search under the reported protocol), underscoring that strong performance on generic web browsing does not automatically transfer to these settings.
+Empirical reports in the accompanying materials indicate that contemporary frontier models remain **far below saturation** on these tracks (e.g., on the order of **single-digit accuracy** for Deep Search and **single-digit IoU** for Wide Search), underscoring that strong performance on generic web browsing does not automatically transfer to these settings.
 
 
 ## Figures
@@ -68,7 +64,6 @@ Main experimental results reported with the DeepXiv search tool (end-to-end syst
 | 🧠 | `prompts.py` + `utils.py` | Shared prompting logic, model client wiring, and JSONL helpers. |
 | 📊 | `evaluate/evaluate_deep_search.py` + `evaluate/evaluate_wide_search.py` | Deep-search judging and wide-search retrieval metrics. |
 | 🔓 | `decrypt_benchmark.py` + `benchmark_crypto.py` | Local bundle restoration from the released `.obf.json` file back to plaintext JSONL. |
-| 🗂️ | `input_data/` + `output_data/` | Example inputs and generated inference outputs. |
 
 ## Quick Start
 
@@ -112,22 +107,22 @@ mkdir -p input_data
 export HF_TOKEN=your_hf_token  # required if the dataset repo is private
 curl -L \
   -H "Authorization: Bearer ${HF_TOKEN}" \
-  -o input_data/Academic-Deep-Search-CR-0331.jsonl.obf.json \
-  https://huggingface.co/datasets/Lk123/Academic-DeepWide-Search/resolve/main/Academic-Deep-Search-CR-0331.jsonl.obf.json
+  -o input_data/Academic-DeepWide-Search.jsonl.obf.json \
+  https://huggingface.co/datasets/Lk123/Academic-DeepWide-Search/resolve/main/Academic-DeepWide-Search.jsonl.obf.json
 ```
 
 ### 2. Decrypt it locally
 
 ```bash
 python3 decrypt_benchmark.py \
-  --input-file input_data/Academic-Deep-Search-CR-0331.jsonl.obf.json \
-  --output-file input_data/Academic-Deep-Search-CR-0331.jsonl
+  --input-file input_data/Academic-DeepWide-Search.jsonl.obf.json \
+  --output-file input_data/Academic-DeepWide-Search.jsonl
 ```
 
 ### 3. Point inference to the decrypted JSONL
 
 ```bash
-INPUT_FILE=input_data/Academic-Deep-Search-CR-0331.jsonl
+INPUT_FILE=input_data/Academic-DeepWide-Search.jsonl
 ```
 
 > [!NOTE]

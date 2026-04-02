@@ -22,8 +22,9 @@ PathLike = Union[str, Path]
 
 
 def configure_logging(verbose: bool = False) -> None:
-    level = logging.DEBUG if verbose else logging.INFO
-    logging.basicConfig(level=level, format="%(levelname)s %(name)s: %(message)s")
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+    for logger_name in ("openai", "openai._base_client", "httpx", "httpcore"):
+        logging.getLogger(logger_name).setLevel(logging.WARNING)
 
 
 def ensure_parent_dir(path: PathLike) -> None:
@@ -114,10 +115,15 @@ def count_tokens(content: Any, model: str = "gpt-4") -> int:
     return 0
 
 
-def format_paper_list_for_prompt(paper_list: Sequence[Dict[str, Any]], simplify: bool = False) -> str:
+def format_paper_list_for_prompt(
+    paper_list: Sequence[Dict[str, Any]],
+    simplify: bool = False,
+    search_type: str = "deep",
+) -> str:
     formatted_papers: List[Dict[str, Any]] = []
+    should_simplify = str(search_type).lower() != "wide" and simplify
     for paper in paper_list:
-        if simplify:
+        if should_simplify:
             formatted_papers.append(
                 {
                     "paper_title": paper.get("paper_title", ""),
@@ -138,11 +144,29 @@ def format_paper_list_for_prompt(paper_list: Sequence[Dict[str, Any]], simplify:
     return json.dumps(formatted_papers, ensure_ascii=False)
 
 
+def format_paper_list_for_logging(
+    paper_list: Sequence[Dict[str, Any]],
+    visible_paper_number: Optional[int] = None,
+) -> str:
+    papers_to_log = paper_list[:visible_paper_number] if visible_paper_number is not None else paper_list
+    return json.dumps(
+        [
+            {
+                "paper_title": paper.get("paper_title", ""),
+                "pub_date": paper.get("pub_date", []),
+            }
+            for paper in papers_to_log
+        ],
+        ensure_ascii=False,
+    )
+
+
 def build_agent_messages(
     system_prompt: str,
     user_query: str,
     turn_data: Sequence[Dict[str, Any]],
     visible_paper_number: int,
+    search_type: str = "deep",
 ) -> List[Dict[str, str]]:
     messages = [
         {"role": "system", "content": system_prompt},
@@ -163,6 +187,7 @@ def build_agent_messages(
         list_str = format_paper_list_for_prompt(
             turn["paper_list"][:visible_paper_number],
             simplify=is_simplified,
+            search_type=search_type,
         )
         messages.append({"role": "user", "content": f"<tool_response>{list_str}</tool_response>"})
 

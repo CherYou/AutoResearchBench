@@ -24,6 +24,7 @@ from utils import (
     count_tokens,
     ensure_parent_dir,
     filter_pending_items,
+    format_paper_list_for_logging,
     load_completed_questions,
     load_jsonl,
     make_inference_error_result,
@@ -67,12 +68,18 @@ class AgentService:
             return WebSearchEngine()
         raise ValueError(f"Invalid paper search tool: {tool_name}")
 
-    def _build_messages(self, user_query: str, turn_data: Sequence[Dict[str, Any]]) -> List[Dict[str, str]]:
+    def _build_messages(
+        self,
+        user_query: str,
+        turn_data: Sequence[Dict[str, Any]],
+        search_type: str = "deep",
+    ) -> List[Dict[str, str]]:
         return build_agent_messages(
             system_prompt=AGENT_SYSTEM_PROMPT,
             user_query=user_query,
             turn_data=turn_data,
             visible_paper_number=self.visible_paper_number,
+            search_type=search_type,
         )
 
     def _check_limits(self, messages: List[Dict[str, str]], turn_count: int, input_tokens: int) -> Tuple[bool, str]:
@@ -138,7 +145,7 @@ class AgentService:
     async def close(self) -> None:
         await self.planner_agent.close()
 
-    async def _run_single_pass(self, user_query: str) -> Dict[str, Any]:
+    async def _run_single_pass(self, user_query: str, search_type: str = "deep") -> Dict[str, Any]:
         start_total_time = time.time()
 
         current_paper_list: List[Dict[str, Any]] = []
@@ -153,7 +160,7 @@ class AgentService:
 
         for turn_count in range(1, self.max_turns + 1):
             turn_start_time = time.time()
-            messages = self._build_messages(user_query, turn_data)
+            messages = self._build_messages(user_query, turn_data, search_type=search_type)
             input_tokens = count_tokens(messages, self.model)
             finished, status = self._check_limits(messages, turn_count, input_tokens)
 
@@ -164,7 +171,6 @@ class AgentService:
                     temperature=0.6,
                 )
                 if self.verbose:
-                    LOGGER.info("Turn %s last user message:\n%s", turn_count, messages[-1]["content"])
                     LOGGER.info("Turn %s model output:\n%s", turn_count, output)
             except Exception as exc:
                 error_message = str(exc)
@@ -210,6 +216,15 @@ class AgentService:
             elif action_type == "tool":
                 try:
                     current_paper_list = await self._execute_search_tool(action_content)
+                    if self.verbose:
+                        LOGGER.info(
+                            "Turn %s tool response:\n%s",
+                            turn_count,
+                            format_paper_list_for_logging(
+                                current_paper_list,
+                                visible_paper_number=self.visible_paper_number,
+                            ),
+                        )
                     turn_data.append(
                         {
                             "assistant_output": output,
@@ -257,10 +272,15 @@ class AgentService:
             "turn_details": turn_details,
         }
 
-    async def _run_with_retry(self, user_query: str, max_attempts: int = 3) -> Dict[str, Any]:
+    async def _run_with_retry(
+        self,
+        user_query: str,
+        search_type: str = "deep",
+        max_attempts: int = 3,
+    ) -> Dict[str, Any]:
         for attempt in range(1, max_attempts + 1):
             try:
-                return await self._run_single_pass(user_query)
+                return await self._run_single_pass(user_query, search_type=search_type)
             except Exception as exc:
                 LOGGER.warning("Inference attempt %s/%s failed for query %r: %s", attempt, max_attempts, user_query, exc)
         return make_inference_error_result(f"Failed after {max_attempts} attempts for query: {user_query}")
@@ -273,7 +293,10 @@ class AgentService:
     ) -> Dict[str, Any]:
         async with semaphore:
             user_query = data_item.get("question", "")
-            inference_results = await asyncio.gather(*[self._run_with_retry(user_query) for _ in range(k)])
+            search_type = str(data_item.get("type", "deep")).lower()
+            inference_results = await asyncio.gather(
+                *[self._run_with_retry(user_query, search_type=search_type) for _ in range(k)]
+            )
             for pass_id, result in enumerate(inference_results):
                 result["pass_id"] = pass_id
             return {
