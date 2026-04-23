@@ -1,10 +1,10 @@
-<h1 align="center">Academic DeepWide Search</h1>
+<h1 align="center">AutoResearchBench</h1>
 
 <p align="center">English · <a href="README_zh.md">简体中文</a></p>
 
 <div align="center">
 
-<strong>Reference code for inference and evaluation on the Academic DeepWide Search benchmark.</strong>
+<strong>Reference code for inference and evaluation on the AutoResearchBench.</strong>
 
 <br />
 <br />
@@ -31,12 +31,13 @@
 
 ## Abstract
 
-The Academic DeepWide Search benchmark is designed for **scientific literature search** under conditions where credible answers typically require **full-text reading**, **fine-grained evidence**, and **multi-hop reasoning along citation relations**, rather than shallow keyword or abstract-level matching.
+Autonomous scientific research is significantly advanced thanks to the development of AI agents. One key step in this process is finding the right scientific literature, whether to explore existing knowledge for a research problem, or to acquire evidence for verifying assumptions and supporting claims. 
+To assess AI agents' capability in driving this process, we present **AutoResearchBench**, a dedicated benchmark for autonomous scientific literature discovery.
 
 Two complementary tracks are evaluated:
 
-- **Deep Search** (*precision-oriented retrieval*): locate the unique paper that satisfies a set of obfuscated, detail-heavy constraints (including evidence that may appear deep in the main text, appendix, or tables).
-- **Wide Search** (*recall-oriented set construction*): given a topic and constraints, collect **all** papers that meet the specification—analogous to exhaustive coverage in a structured literature survey.
+- **Deep Research** (*precision-oriented retrieval*): locate the unique paper that satisfies a set of obfuscated, detail-heavy constraints (including evidence that may appear deep in the main text, appendix, or tables).
+- **Wide Research** (*recall-oriented set construction*): given a topic and constraints, collect **all** papers that meet the specification—analogous to exhaustive coverage in a structured literature survey.
 
 Empirical reports in the accompanying materials indicate that contemporary frontier models remain **far below saturation** on these tracks (e.g., on the order of **single-digit accuracy** for Deep Search and **single-digit IoU** for Wide Search), underscoring that strong performance on generic web browsing does not automatically transfer to these settings.
 
