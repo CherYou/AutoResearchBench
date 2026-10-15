@@ -4,7 +4,7 @@
 
 <div align="center">
 
-<strong>Reference code for inference and evaluation on the AutoResearchBench.</strong>
+<strong>Reference code for inference and evaluation on the AutoResearchBench. (NIPS 2026)</strong>
 
 <br />
 <br />
