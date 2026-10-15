@@ -4,7 +4,7 @@
 
 <div align="center">
 
-<strong>AutoResearchBench基准的推理与评测参考实现。</strong>
+<strong>AutoResearchBench基准的推理与评测参考实现。（NIPS 2026）</strong>
 
 <br />
 <br />
