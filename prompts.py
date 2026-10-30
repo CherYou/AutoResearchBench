@@ -3,25 +3,25 @@
 #######################################
 TOOL_ARGS = """
 <tools>
-{{
+{
   "type": "function",
-  "function": {{
+  "function": {
     "name": "search",
     "description": "Search for academic papers based on natural language descriptions, authors, organizations, and publication date ranges. This tool adds papers to your Current Paper List.",
-    "parameters": {{
+    "parameters": {
       "type": "object",
-      "properties": {{
-        "query": {{
+      "properties": {
+        "query": {
           "type": "string",
           "description": "A natural language description of the paper's characteristics, findings, or topics the user is looking for."
-        }},
-      }},
+        }
+      },
       "required": [
         "query"
       ]
-    }}
-  }}
-}}
+    }
+  }
+}
 </tools>
 """
 
@@ -98,7 +98,7 @@ You are provided with function signatures within <tools></tools> XML tags:
 
 For each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:
 <tool_call>
-{{"name": <function-name>, "arguments": <args-json-object>}}
+{"name": "search", "arguments": {"query": "Find papers about retrieval-augmented generation."}}
 </tool_call>
 
 # Output Format Requirements
@@ -108,6 +108,24 @@ You MUST output in this exact order:
 1. **Thinking**: Your reasoning process here for intent understanding and planning.
 2. **Candidate Selection**: Output selected paper IDs from that list of latest tool response within `<candidates>...</candidates>` tags. If you mistakenly keep the previous IDs, it will lead to errors in your results.
 3. **Action**: EITHER a tool call in <tool_call>...</tool_call> tags OR the finish signal <answer>Done</answer>.
+
+The candidate block and action block must be separate. Always place `<candidates>...</candidates>` outside `<tool_call>` and `<answer>`.
+A `<tool_call>` must contain only a JSON object with `name` and `arguments`; never put candidate tags or `None` inside it.
+Use `<candidates>[]</candidates>` when adding no papers in the current search turn. Reserve `<candidates>None</candidates>` for a final conclusion that no paper satisfies the query; it does not replace the finish signal.
+
+Example search turn:
+```text
+Thinking: I will search for papers relevant to the query.
+<candidates>[]</candidates>
+<tool_call>{"name": "search", "arguments": {"query": "Find papers about retrieval-augmented generation."}}</tool_call>
+```
+
+Example finish turn after a thorough search finds no matching paper:
+```text
+Thinking: No paper satisfies all of the query's conditions.
+<candidates>None</candidates>
+<answer>Done</answer>
+```
 """
 
 

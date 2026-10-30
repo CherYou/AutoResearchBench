@@ -208,11 +208,20 @@ def parse_agent_output(output: str) -> Dict[str, Any]:
                 action = {"type": "tool", "content": json.loads(json_str)}
             except json.JSONDecodeError as exc:
                 LOGGER.warning("Failed to parse tool-call JSON: %s", exc)
+                correction = "You need to think again and provide the correct JSON format."
+                if CANDIDATES_PATTERN.search(json_str) or json_str.lower() == "none":
+                    correction = (
+                        "Place <candidates>...</candidates> outside <tool_call>. "
+                        "A tool call must contain only a JSON object with name and arguments, "
+                        'for example {"name": "search", "arguments": {"query": "your search query"}}. '
+                        "If you intend to finish, use <answer>Done</answer> instead of a tool call. "
+                        "Candidate selection alone is not an action."
+                    )
                 action = {
                     "type": "error",
                     "content": (
                         "Failed to parse tool arguments JSON: "
-                        f"{json_str}. You need to think again and provide the correct JSON format."
+                        f"{json_str}. {correction}"
                     ),
                 }
         else:
